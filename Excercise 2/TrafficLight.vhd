@@ -60,8 +60,9 @@ begin
       DISABLE_reg <= DISABLE;
       STATE_CURRENT <= STATE_NEXT;
       RESET_reg <= RESET;
-    elsif RESET_reg = '1' then
-      STATE_CURRENT <= YELLOW;
+      if RESET_reg = '1' then
+        STATE_CURRENT <= YELLOW;
+      end if;
     end if;
   end process;
 
@@ -141,3 +142,66 @@ begin
 
 
 end architecture CarTrafficLight;
+
+architecture PedestrianTrafficLight of TrafficLight is
+  signal RESET_reg, RUN_reg, DISABLE_reg : std_logic;
+  type P_States is (OFF, GREEN, RED);
+  signal STATE_CURRENT : P_States := OFF;
+  signal STATE_NEXT : P_States;
+
+  signal BLINKED : std_logic_vector(3 downto 0) := "0000";
+begin
+  
+  L_GREEN <= '1' when STATE_CURRENT = GREEN else '0';
+  L_RED <= '1' when STATE_CURRENT = RED else '0';
+  L_YELLOW <= '0'; -- Pedestrian Lights don't have a Yellow light so output is always '0'!
+  
+  InputManager : process (CLK, RESET) is 
+  begin 
+    if rising_edge(CLK) then
+      RUN_reg <= RUN;
+      DISABLE_reg <= DISABLE;
+      STATE_CURRENT <= STATE_NEXT;
+      RESET_reg <= RESET;
+      
+      if RESET_reg = '1' then
+        STATE_CURRENT <= OFF;
+      end if;
+    end if;
+  end process;
+
+  StateManager : process (STATE_CURRENT, RUN_reg, DISABLE_reg) is
+  begin
+    STATE_NEXT <= STATE_CURRENT;
+
+    if DISABLE_reg = '0' then
+      case STATE_CURRENT is 
+        when OFF => 
+          if unsigned(BLINKED) < MaxGreenBlinks + 1 then
+            STATE_NEXT <= GREEN;
+          else 
+            STATE_NEXT <= RED;
+          end if;
+        when RED => 
+          if RUN_reg = '1' then
+            STATE_NEXT <= GREEN;
+          end if;
+        when GREEN => 
+          if RUN_reg = '0' then
+            if unsigned(BLINKED) < MaxGreenBlinks then 
+              BLINKED <= std_logic_vector(unsigned(BLINKED) + 1);
+              STATE_NEXT <= OFF;
+            else  
+              STATE_NEXT <= RED;
+            end if;
+          end if;
+        when others => 
+          STATE_NEXT <= OFF;
+
+      end case;
+    else 
+      STATE_NEXT <= OFF;
+    end if;
+  end process;
+  
+end architecture PedestrianTrafficLight;
