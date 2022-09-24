@@ -2,10 +2,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity TrafficLight_Tb is
-end entity TrafficLight_Tb;
+entity PedestrianTrafficLight_Tb is
+end entity PedestrianTrafficLight_Tb;
 
-architecture stimuli of TrafficLight_Tb is
+architecture stimuli of PedestrianTrafficLight_Tb is
   constant ClockFrequency : integer := 50; -- Hz
   constant ClockPeriod : time := 1000 ms / ClockFrequency;
 
@@ -29,7 +29,7 @@ architecture stimuli of TrafficLight_Tb is
   end component;
 begin
   
-  T_LIGHT : TrafficLight generic map (
+  T_LIGHT : entity work.TrafficLight(PedestrianTrafficLight) generic map (
     ClockPeriod, YellowHold, GreenBlinks, GreenBlink
   ) port map (
     CLK, RESET, RUN, DISABLE, GREEN, RED, YELLOW

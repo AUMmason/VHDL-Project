@@ -107,6 +107,7 @@ begin
           end if;
           -- else bleibt Grün
         when others => 
+          BLINKED <= std_logic_vector( to_unsigned( MaxGreenBlinks + 1, BLINKED'length));
           STATE_NEXT <= YELLOW;
       end case;
 
@@ -184,6 +185,7 @@ begin
           end if;
         when RED => 
           if RUN_reg = '1' then
+            BLINKED <= "0000";
             STATE_NEXT <= GREEN;
           end if;
         when GREEN => 
@@ -196,10 +198,12 @@ begin
             end if;
           end if;
         when others => 
+          BLINKED <= std_logic_vector( to_unsigned( MaxGreenBlinks + 1, BLINKED'length));
           STATE_NEXT <= OFF;
 
       end case;
     else 
+      BLINKED <= std_logic_vector( to_unsigned( MaxGreenBlinks + 1, BLINKED'length));
       STATE_NEXT <= OFF;
     end if;
   end process;
