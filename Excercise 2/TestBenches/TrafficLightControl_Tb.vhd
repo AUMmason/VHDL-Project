@@ -15,6 +15,7 @@ architecture stimuli of TrafficLightControl_Tb is
     );
     port (
       signal RESET, ENABLE : in std_logic;
+      signal TIME_CURRENT : in time;
       -- Signals for Pedestrian Traffic Lights
       signal NS_PED_RED, NS_PED_GREEN : out std_logic;   
       signal OW_PED_RED, OW_PED_GREEN : out std_logic; 
@@ -36,8 +37,9 @@ architecture stimuli of TrafficLightControl_Tb is
   signal OW_CAR_RED, OW_CAR_YELLOW, OW_CAR_GREEN : std_logic;
 
   constant GreenPhaseTime : time := 10000 ms;
-  constant NightModeStart : time := 2200 ms; --22:00
-  constant NightModeEnd : time := 400 ms;    --04:00
+  constant NightModeStart : time := 22*60 min; --22:00
+  constant NightModeEnd   : time := 4*60 min;  --04:00
+  signal TIME_CURRENT     : time;
 
 begin
   NS_PED <= (NS_PED_RED, NS_PED_GREEN);
@@ -50,6 +52,7 @@ begin
   ) port map (
     RESET => RESET_TB,
     ENABLE => ENABLE_TB,
+    TIME_CURRENT => TIME_CURRENT,
     NS_PED_RED => NS_PED_RED,
     NS_PED_GREEN => NS_PED_GREEN,  
     OW_PED_RED => OW_PED_RED,
@@ -64,13 +67,14 @@ begin
 
   Stimuli: process is
   begin
-    ENABLE_TB <= '0';
+    ENABLE_TB <= '1';
+    TIME_CURRENT <= 3*60 min;
 
     wait for 7000 ms;
 
-    ENABLE_TB <= '1';
+    TIME_CURRENT <= 7*60 min;
 
-    wait for 100000 ms;
+    wait for 43000 ms;
 
   end process Stimuli;
     

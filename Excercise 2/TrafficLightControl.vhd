@@ -6,11 +6,12 @@ entity TrafficLightControl is
   -- Generic interface according to specification
   generic (
     GreenPhaseTime : time;
-    NightModeStart : time;
+    NightModeStart : time; -- Minutes passed since 00:00
     NightModeEnd : time
   );
   port (
     signal RESET, ENABLE : in std_logic;
+    signal TIME_CURRENT : in time;
     -- Signals for Pedestrian Traffic Lights
     signal NS_PED_RED, NS_PED_GREEN : out std_logic;   
     signal OW_PED_RED, OW_PED_GREEN : out std_logic; 
@@ -132,7 +133,11 @@ begin
   InputManager: process(CLK, RESET) is
   begin
     if rising_edge(CLK) then
-      ENABLE_reg <= ENABLE;
+      if TIME_CURRENT < NightModeStart and TIME_CURRENT > NightModeEnd then
+        ENABLE_reg <= ENABLE;
+      else 
+        ENABLE_reg <= '0';
+      end if;
       STATE_CURRENT <= STATE_NEXT;
     elsif RESET = '1' then
       STATE_CURRENT <= OFF;
