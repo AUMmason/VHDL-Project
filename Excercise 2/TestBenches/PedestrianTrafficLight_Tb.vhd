@@ -55,12 +55,23 @@ begin
 
     RUN <= '0';
 
-    wait for 4500 ms;
+    wait for 800 ms;
+
+    RUN <= '1';
+
+    wait for 2000 ms;
 
     DISABLE <= '1';
 
-    wait for 9000 ms;
+    wait for 800 ms;
 
+    DISABLE <= '0';
+
+    wait for 2000 ms;
+
+    RUN <= '0';
+
+    wait for 3000 ms;
     wait;
   end process;
   

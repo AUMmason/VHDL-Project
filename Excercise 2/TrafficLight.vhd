@@ -25,26 +25,27 @@ architecture CarTrafficLight of TrafficLight is
   
   -- Timing Signals
   signal BLINKED : std_logic_vector(3 downto 0) := "0000"; --4 Bits wegen Vorzeichen
-  signal TIMER_LIMIT : time := 0 ms;
-  signal TIMER_END, TIMER_RESET : std_logic := '0';
+  signal TIMER_LIMIT, TIMER_MEASURED : time := 0 ms;
+  signal TIMER_RESET, TIMER_RESET_DONE : std_logic := '0';
   
   -- Import of Timecounter
-  component TimeAlert is
+  component Timer is
     generic (
       ClockPeriod : time
     );
     port (
       signal CLK, RESET : in std_logic;
       signal LIMIT : in time;
-      signal FINISHED : out std_logic
+      signal MEASURED : out time;
+      signal RESET_DONE : out std_logic
     );
-  end component TimeAlert;
+  end component Timer;
 
 begin
-  T_ALERT : TimeAlert generic map(
+  T_0 : Timer generic map(
     ClockPeriod
   ) port map (
-    CLK, TIMER_RESET, TIMER_LIMIT, TIMER_END 
+    CLK, TIMER_RESET, TIMER_LIMIT, TIMER_MEASURED, TIMER_RESET_DONE 
   );
 
   -- Register Outputs
@@ -136,25 +137,26 @@ architecture PedestrianTrafficLight of TrafficLight is
   signal STATE_NEXT : P_States;
 
   signal BLINKED : std_logic_vector(3 downto 0) := "0000";
-  signal TIMER_LIMIT : time := 0 ms;
-  signal TIMER_END, TIMER_RESET : std_logic := '0';
-  
+  signal TIMER_LIMIT, TIMER_MEASURED : time := 0 ms;
+  signal TIMER_RESET, TIMER_RESET_DONE : std_logic := '0';
+  signal PHASE_ENDED : std_logic := '0';
   -- Import of Timecounter
-  component TimeAlert is
+  component Timer is
     generic (
       ClockPeriod : time
     );
     port (
       signal CLK, RESET : in std_logic;
       signal LIMIT : in time;
-      signal FINISHED : out std_logic
+      signal MEASURED : out time;
+      signal RESET_DONE : out std_logic
     );
-  end component TimeAlert;
+  end component Timer;
 begin
-  T_ALERT : TimeAlert generic map(
+  T_ALERT : Timer generic map(
     ClockPeriod
   ) port map (
-    CLK, TIMER_RESET, TIMER_LIMIT, TIMER_END 
+    CLK, TIMER_RESET, TIMER_LIMIT, TIMER_MEASURED, TIMER_RESET_DONE 
   );
 
   -- Outputs
@@ -178,7 +180,7 @@ begin
     end if;
   end process;
 
-  StateManager : process (STATE_CURRENT, RUN_reg, DISABLE_reg) is
+  StateManager : process (STATE_CURRENT, RUN_reg, DISABLE_reg, TIMER_MEASURED) is
   begin
     STATE_NEXT <= STATE_CURRENT;
 
@@ -186,9 +188,12 @@ begin
       case STATE_CURRENT is 
         when OFF => 
           if unsigned(BLINKED) < MaxGreenBlinks + 1 then
-            if TIMER_END = '1' then
-              STATE_NEXT <= GREEN;
+            if TIMER_MEASURED > TIMER_LIMIT then
+              PHASE_ENDED <= '1';
               TIMER_RESET <= not TIMER_RESET;
+            elsif PHASE_ENDED = '1' and TIMER_RESET_DONE = '1' then
+              PHASE_ENDED <= '0';
+              STATE_NEXT <= GREEN;
             end if;
           else 
             STATE_NEXT <= RED;
@@ -198,15 +203,21 @@ begin
           if RUN_reg = '1' then
             BLINKED <= "0000";
             STATE_NEXT <= GREEN;
+            TIMER_RESET <= not TIMER_RESET;
           end if;
 
         when GREEN => 
           if RUN_reg = '0' then
-            if unsigned(BLINKED) < MaxGreenBlinks then
-              if TIMER_END = '1' then
-                BLINKED <= std_logic_vector(unsigned(BLINKED) + 1);
-                STATE_NEXT <= OFF;              
+            if unsigned(BLINKED) < MaxGreenBlinks + 1 then
+              if RUN_reg'event then 
                 TIMER_RESET <= not TIMER_RESET;
+              elsif TIMER_MEASURED > TIMER_LIMIT then
+                BLINKED <= std_logic_vector(unsigned(BLINKED) + 1);
+                PHASE_ENDED <= '1';
+                TIMER_RESET <= not TIMER_RESET;
+              elsif PHASE_ENDED = '1' and TIMER_RESET_DONE = '1' then
+                PHASE_ENDED <= '0';
+                STATE_NEXT <= OFF;
               end if;
             else  
               STATE_NEXT <= RED;
@@ -214,12 +225,17 @@ begin
           end if;
 
         when others => 
+          PHASE_ENDED <= '0';
           BLINKED <= std_logic_vector( to_unsigned( MaxGreenBlinks + 1, BLINKED'length));
           STATE_NEXT <= OFF;
 
       end case;
     else 
-      BLINKED <= std_logic_vector( to_unsigned( MaxGreenBlinks + 1, BLINKED'length));
+      if RUN_reg = '1' then
+        BLINKED <= "0000";
+      else 
+        BLINKED <= std_logic_vector( to_unsigned( MaxGreenBlinks + 1, BLINKED'length));
+      end if;
       STATE_NEXT <= OFF;
     end if;
   end process;

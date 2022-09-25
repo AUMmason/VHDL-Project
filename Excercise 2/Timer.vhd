@@ -11,7 +11,8 @@ entity Timer is
   port (
     signal CLK, RESET : in std_logic;
     signal LIMIT : in time;
-    signal MEASURED : out time
+    signal MEASURED : out time;
+    signal RESET_DONE : out std_logic
   );
 end entity Timer;
 
@@ -32,6 +33,7 @@ begin
   I_RST : ImpulseReset port map(CLK, RESET, RESET_reg);
 
   MEASURED <= MEASURED_MILLISECONDS;
+  RESET_DONE <= RESET_reg;
 
   process (CLK) is 
   begin 
