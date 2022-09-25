@@ -99,7 +99,11 @@ begin
             TIMER_RESET <= not TIMER_RESET;
           elsif PHASE_ENDED = '1' and TIMER_RESET_DONE = '1' then
             PHASE_ENDED <= '0';
-            STATE_NEXT <= RED;
+            if RUN = '1' then 
+              STATE_NEXT <= GREEN;
+            else 
+              STATE_NEXT <= RED;
+            end if;
           end if;
   
         when RED => 
@@ -145,7 +149,6 @@ begin
               if PHASE_ENDED = '0' then
                 PHASE_ENDED <= '1';
                 TIMER_LIMIT <= YellowHoldTime;
-                TIMER_RESET <= not TIMER_RESET;
               elsif PHASE_ENDED = '1' and TIMER_RESET_DONE = '1' then
                 PHASE_ENDED <= '0';
                 STATE_NEXT <= YELLOW;
