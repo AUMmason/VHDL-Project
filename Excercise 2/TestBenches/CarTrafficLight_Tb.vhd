@@ -19,8 +19,8 @@ architecture stimuli of CarTrafficLight_Tb is
     generic (
       ClockPeriod : time;
       YellowHoldTime : time;     -- 2 Sekunden für das Halten der Grünphase
-      MaxGreenBlinks : integer;  -- Maximale Anzahl die Grün Blinken soll
-      GreenBlinkTime : time      -- Zeitangabe für Hell und Dunkelphase (Einzelne Phase = / 2) 
+      GreenBlinkTime : time;      -- Zeitangabe für Hell und Dunkelphase (Einzelne Phase = / 2) 
+      MaxGreenBlinks : integer  -- Maximale Anzahl die Grün Blinken soll
     );
     port (
       signal CLK, RESET, RUN, DISABLE : in std_logic;
@@ -30,7 +30,7 @@ architecture stimuli of CarTrafficLight_Tb is
 begin
   
   T_LIGHT : entity work.TrafficLight(CarTrafficLight) generic map (
-    ClockPeriod, YellowHold, GreenBlinks, GreenBlink
+    ClockPeriod, YellowHold, GreenBlink, GreenBlinks
   ) port map (
     CLK, RESET, RUN, DISABLE, GREEN, RED, YELLOW
   );

@@ -6,8 +6,8 @@ entity TrafficLight is
   generic (
     ClockPeriod : time;
     YellowHoldTime : time;     -- 2 Sekunden für das Halten der Grünphase
-    MaxGreenBlinks : integer;  -- Maximale Anzahl die Grün Blinken soll
-    GreenBlinkTime : time      -- Zeitangabe für Hell und Dunkelphase (Einzelne Phase = / 2) 
+    GreenBlinkTime : time;      -- Zeitangabe für Hell und Dunkelphase (Einzelne Phase = / 2) 
+    MaxGreenBlinks : integer  -- Maximale Anzahl die Grün Blinken soll bei Beendung der Grünphase
   );
   port (
     signal CLK, RESET, RUN, DISABLE : in std_logic;
