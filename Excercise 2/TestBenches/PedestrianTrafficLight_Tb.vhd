@@ -39,27 +39,27 @@ begin
 
   Stimuli : process is
   begin 
-    wait for 100 ms;
+    wait for 1000 ms;
 
     DISABLE <= '1';
 
-    wait for 400 ms;
+    wait for 7000 ms;
 
     DISABLE <= '0';
 
-    wait for 400 ms;
+    wait for 5000 ms;
 
     RUN <= '1';
 
-    wait for 400 ms;
+    wait for 5500 ms;
 
     RUN <= '0';
 
-    wait for 400 ms;
+    wait for 4500 ms;
 
     DISABLE <= '1';
 
-    wait for 400 ms;
+    wait for 9000 ms;
 
     wait;
   end process;

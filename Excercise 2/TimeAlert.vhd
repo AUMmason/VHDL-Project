@@ -19,7 +19,7 @@ architecture rtl of TimeAlert is
   signal CLOCK_TICKS : integer := 0;
   signal MEASURED_MILLISECONDS : time := 0 ms;
   signal LIMIT_reg : time := 0 ms;
-  signal FINISHED_reg : std_logic;
+  signal FINISHED_reg, RESET_reg : std_logic;
 
   procedure ResetTicks (
     signal RESULT : out std_logic; 
@@ -42,14 +42,12 @@ begin
         FINISHED_reg <= '1';
       end if;
 
-      if LIMIT'event or LIMIT /= LIMIT_reg then -- Signal also gets reset when counter changes in value
+      if rising_edge(RESET) or falling_edge(RESET) or LIMIT'event or LIMIT /= LIMIT_reg then -- Signal also gets reset when counter changes in value
         -- LIMIT_reg <= LIMIT;
         ResetTicks(FINISHED_reg, CLOCK_TICKS);
       end if;
-
-    elsif rising_edge(RESET) then 
-      ResetTicks(FINISHED_reg, CLOCK_TICKS);
     end if;
+    
   end process;
 
   process (CLOCK_TICKS) is 

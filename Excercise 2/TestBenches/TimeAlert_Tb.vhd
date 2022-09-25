@@ -20,20 +20,9 @@ architecture stimuli of TimeAlert_Tb is
     port (
       signal CLK, RESET : in std_logic;
       signal LIMIT : in time;
-      signal FINISHED : out std_logic
+      signal TIME : out std_logic
     );
   end component TimeAlert;
-
-  -- Später in ein Package geben
-  procedure ResetTimer (
-    signal RES : out std_logic;
-    constant Period : in time
-  ) is
-  begin
-    RES <= '1';
-    wait for Period;
-    RES <= '0';
-  end procedure;
 
 begin
   
@@ -51,11 +40,11 @@ begin
 
     wait for 600 ms;
 
-    ResetTimer(RESET_Tb, ClockPeriod);
+    RESET_Tb <= not RESET_Tb;
 
     wait for 300 ms;
 
-    ResetTimer(RESET_Tb, ClockPeriod);
+    RESET_Tb <= not RESET_Tb;
 
     wait for 580 ms;
 

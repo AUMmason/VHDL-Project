@@ -127,21 +127,6 @@ begin
     end if;
   end process;
 
-  
-  -- Statemachine
-
-  -- Ablauf einer Ampel
-
-  -- ROT (Ampel leuchtet Rot)
-  -- ROT ENDE: (Ampel leuchtet Rot und Gelb für 2 Sekunden)
-  -- GRÜN (Ampel leuchtet Grün)
-  -- GRÜN ENDE 1: 4 mal Grün blinken (Leucht und Dunkelphase abwechselnd für 1/2 Sekunde)
-  -- GRÜN ENDE 2: Gelb leuchtet für 2 Sekunden
-  
-  -- Ausgeschaltet Abwechselnd Gelb blinkend für 2 Sekunden an und aus
-
-
-
 end architecture CarTrafficLight;
 
 architecture PedestrianTrafficLight of TrafficLight is
@@ -151,20 +136,42 @@ architecture PedestrianTrafficLight of TrafficLight is
   signal STATE_NEXT : P_States;
 
   signal BLINKED : std_logic_vector(3 downto 0) := "0000";
-begin
+  signal TIMER_LIMIT : time := 0 ms;
+  signal TIMER_END, TIMER_RESET : std_logic := '0';
   
+  -- Import of Timecounter
+  component TimeAlert is
+    generic (
+      ClockPeriod : time
+    );
+    port (
+      signal CLK, RESET : in std_logic;
+      signal LIMIT : in time;
+      signal FINISHED : out std_logic
+    );
+  end component TimeAlert;
+begin
+  T_ALERT : TimeAlert generic map(
+    ClockPeriod
+  ) port map (
+    CLK, TIMER_RESET, TIMER_LIMIT, TIMER_END 
+  );
+
+  -- Outputs
   L_GREEN <= '1' when STATE_CURRENT = GREEN else '0';
   L_RED <= '1' when STATE_CURRENT = RED else '0';
   L_YELLOW <= '0'; -- Pedestrian Lights don't have a Yellow light so output is always '0'!
-  
+  TIMER_LIMIT <= GreenBlinkTime / 2;
+
+
   InputManager : process (CLK, RESET) is 
   begin 
     if rising_edge(CLK) then
       RUN_reg <= RUN;
       DISABLE_reg <= DISABLE;
-      STATE_CURRENT <= STATE_NEXT;
       RESET_reg <= RESET;
-      
+      STATE_CURRENT <= STATE_NEXT;
+
       if RESET_reg = '1' then
         STATE_CURRENT <= OFF;
       end if;
@@ -179,24 +186,33 @@ begin
       case STATE_CURRENT is 
         when OFF => 
           if unsigned(BLINKED) < MaxGreenBlinks + 1 then
-            STATE_NEXT <= GREEN;
+            if TIMER_END = '1' then
+              STATE_NEXT <= GREEN;
+              TIMER_RESET <= not TIMER_RESET;
+            end if;
           else 
             STATE_NEXT <= RED;
           end if;
+
         when RED => 
           if RUN_reg = '1' then
             BLINKED <= "0000";
             STATE_NEXT <= GREEN;
           end if;
+
         when GREEN => 
           if RUN_reg = '0' then
-            if unsigned(BLINKED) < MaxGreenBlinks then 
-              BLINKED <= std_logic_vector(unsigned(BLINKED) + 1);
-              STATE_NEXT <= OFF;
+            if unsigned(BLINKED) < MaxGreenBlinks then
+              if TIMER_END = '1' then
+                BLINKED <= std_logic_vector(unsigned(BLINKED) + 1);
+                STATE_NEXT <= OFF;              
+                TIMER_RESET <= not TIMER_RESET;
+              end if;
             else  
               STATE_NEXT <= RED;
             end if;
           end if;
+
         when others => 
           BLINKED <= std_logic_vector( to_unsigned( MaxGreenBlinks + 1, BLINKED'length));
           STATE_NEXT <= OFF;
