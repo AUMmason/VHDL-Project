@@ -46,7 +46,7 @@ architecture rtl of TrafficLightControl is
   signal PHASE_ENDED : std_logic := '0';
 
   -- State Machine
-  type ControlStates is (OFF, NORTH_SOUTH, OST_WEST);
+  type ControlStates is (OFF, NORTH_SOUTH, OST_WEST, NORTH_SOUTH_END, OST_WEST_END);
   signal STATE_CURRENT : ControlStates := OFF;
   signal STATE_NEXT    : ControlStates;
 
@@ -139,7 +139,7 @@ begin
     end if;
   end process InputManager;
 
-  StateManager: process(ENABLE_reg, STATE_CURRENT, TIMER_MEASURED) -- Add Timer
+  StateManager: process(ENABLE_reg, STATE_CURRENT, TIMER_MEASURED, NS_CAR_RED_reg, OW_CAR_RED_reg) -- Add Timer
   begin
     STATE_NEXT <= STATE_CURRENT;
 
@@ -153,17 +153,28 @@ begin
             PHASE_ENDED <= '0';            
             STATE_NEXT <= NORTH_SOUTH; -- Bekommt Priorität
           end if;
+
         when NORTH_SOUTH => 
           if TIMER_MEASURED > TIMER_LIMIT then
+            STATE_NEXT <= NORTH_SOUTH_END;
+          end if;
+        
+        when NORTH_SOUTH_END => 
+          if NS_CAR_RED_reg'event then
             PHASE_ENDED <= '1';
             TIMER_RESET <= not TIMER_RESET;
           elsif PHASE_ENDED = '1' and TIMER_RESET_DONE = '1' then -- only switch when other lane has red
             PHASE_ENDED <= '0';
             STATE_NEXT <= OST_WEST;
           end if;
-        
+
         when OST_WEST => 
           if TIMER_MEASURED > TIMER_LIMIT then
+            STATE_NEXT <= OST_WEST_END;
+          end if;
+
+          when OST_WEST_END => 
+          if OW_CAR_RED_reg'event then
             PHASE_ENDED <= '1';
             TIMER_RESET <= not TIMER_RESET;
           elsif PHASE_ENDED = '1' and TIMER_RESET_DONE = '1' then
