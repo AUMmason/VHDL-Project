@@ -39,28 +39,40 @@ begin
 
   Stimuli : process is
   begin 
-    wait for 100 ms;
+    report time'image(ClockPeriod);
+    wait for 1000 ms;
 
     DISABLE <= '1';
 
-    wait for 400 ms;
+    wait for 7000 ms;
 
     DISABLE <= '0';
 
-    wait for 400 ms;
+    wait for 7000 ms;
 
     RUN <= '1';
 
-    wait for 400 ms;
+    wait for 8000 ms;
 
     RUN <= '0';
 
-    wait for 400 ms;
+    wait for 8000 ms;
+
+    RUN <= '1';
+
+    wait for 5000 ms;
 
     DISABLE <= '1';
 
-    wait for 400 ms;
+    wait for 800 ms;
 
+    DISABLE <= '0';
+
+    wait for 5000 ms;
+
+    RUN <= '0';
+
+    wait for 3000 ms;
     wait;
   end process;
   

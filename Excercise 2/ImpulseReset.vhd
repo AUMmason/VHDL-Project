@@ -9,23 +9,21 @@ entity ImpulseReset is
 end entity ImpulseReset;
 
 architecture rtl of ImpulseReset is
-  signal REG0, REG1, REG2 : std_logic := '0';
+  signal REG_A, REG_B : std_logic := '0';
 begin
   
   process (CLK, RESET_IN) is
   begin
     if RESET_IN'event then
-      REG0 <= '1';
-      REG1 <= '0';
-      REG2 <= '0';
+      REG_A <= '1';
+      REG_B <= '0';
     elsif rising_edge(CLK) then
-      REG0 <= '0';
-      REG1 <= REG0;
-      REG2 <= REG1;
+      REG_A <= '0';
+      REG_B <= REG_A;
     end if;
   end process;
 
-  RESET_OUT <= '1' when (REG0 = '1' or REG1 = '1' or REG2 = '1') else 
+  RESET_OUT <= '1' when (REG_A = '1' or REG_B = '1') else 
                '0';
   
 end architecture rtl;

@@ -6,7 +6,7 @@ entity PedestrianTrafficLight_Tb is
 end entity PedestrianTrafficLight_Tb;
 
 architecture stimuli of PedestrianTrafficLight_Tb is
-  constant ClockFrequency : integer := 50; -- Hz
+  constant ClockFrequency : integer := 50; -- Hz (Change to 100 Hz later)
   constant ClockPeriod : time := 1000 ms / ClockFrequency;
 
   constant YellowHold : time := 2000 ms;
@@ -39,6 +39,7 @@ begin
 
   Stimuli : process is
   begin 
+    report time'image(ClockPeriod);
     wait for 1000 ms;
 
     DISABLE <= '1';
