@@ -150,6 +150,7 @@ begin
                 PHASE_ENDED <= '1';
                 TIMER_LIMIT <= YellowHoldTime;
               elsif PHASE_ENDED = '1' and TIMER_RESET_DONE = '1' then
+                TIMER_LIMIT <= YellowHoldTime;
                 PHASE_ENDED <= '0';
                 STATE_NEXT <= YELLOW;
               end if; 
