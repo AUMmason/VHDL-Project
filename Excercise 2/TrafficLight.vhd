@@ -5,9 +5,9 @@ use ieee.numeric_std.all;
 entity TrafficLight is 
   generic (
     ClockPeriod : time;
-    YellowHoldTime : time;     -- 2 Sekunden für das Halten der Grünphase
-    GreenBlinkTime : time;      -- Zeitangabe für Hell und Dunkelphase (Einzelne Phase = / 2) 
-    MaxGreenBlinks : integer  -- Maximale Anzahl die Grün Blinken soll bei Beendung der Grünphase
+    YellowHoldTime : time;     -- 2 Seconds
+    GreenBlinkTime : time;     -- Time for Bright- and Darkphase for end of Green phase
+    MaxGreenBlinks : integer   -- Maximum Times
   );
   port (
     signal CLK, RESET, RUN, DISABLE : in std_logic;
@@ -18,13 +18,13 @@ end entity;
 architecture CarTrafficLight of TrafficLight is
   signal RESET_reg, RUN_reg, DISABLE_reg : std_logic;
   
-  -- Statemachine Internal Signals and Type declaration
+  -- Statemachine internal Signals and Type declaration
   type C_States is (OFF, RED, RED_END, GREEN, YELLOW);
   signal STATE_CURRENT : C_States := OFF;
   signal STATE_NEXT : C_States;
   
   -- Timing Signals
-  signal BLINKED : std_logic_vector(3 downto 0) := "0000"; --4 Bits wegen Vorzeichen
+  signal BLINKED : std_logic_vector(3 downto 0) := "0000";
   signal TIMER_LIMIT, TIMER_MEASURED : time := 0 ms;
   signal TIMER_RESET, TIMER_RESET_DONE : std_logic := '0';
   signal PHASE_ENDED : std_logic := '0';
@@ -77,7 +77,7 @@ begin
       case STATE_CURRENT is
         when OFF => 
           if RUN_reg = '0' then
-            if unsigned(BLINKED) < MaxGreenBlinks + 1 then -- Warte 0,5 Sekunden 
+            if unsigned(BLINKED) < MaxGreenBlinks + 1 then -- wait for 0,5 seconds
               if TIMER_MEASURED > TIMER_LIMIT then
                 PHASE_ENDED <= '1';
                 TIMER_LIMIT <= GreenBlinkTime / 2;
@@ -91,8 +91,8 @@ begin
             STATE_NEXT <= YELLOW;
           end if;
   
-        when YELLOW => -- Warte für 2 Sekunden
-          BLINKED <= "0000"; -- Rest Blink counter for green
+        when YELLOW => -- wait for 2 seconds
+          BLINKED <= "0000"; 
           if TIMER_MEASURED > TIMER_LIMIT then
             PHASE_ENDED <= '1';
             TIMER_LIMIT <= GreenBlinkTime / 2;
@@ -118,7 +118,7 @@ begin
             end if;            
           end if;
   
-        when RED_END => -- Warte für 2 Sekunden (Gelb und Rot leuchten)
+        when RED_END => -- wait for 2 seconds
           if RUN = '1' then
             if TIMER_MEASURED > TIMER_LIMIT then
               PHASE_ENDED <= '1';
@@ -131,7 +131,7 @@ begin
             STATE_NEXT <= RED;
           end if;
   
-        when GREEN => -- Viermal Blinked aufhörend mit Grün (jeweils 0,5 sekunden) 
+        when GREEN => -- blink 4 times
           if RUN_reg = '0' then
             if unsigned(BLINKED) < MaxGreenBlinks + 1 then
               if RUN_reg'event then 
@@ -156,15 +156,14 @@ begin
               end if; 
             end if;
           end if;
-
-          -- else bleibt Grün
+          
         when others =>     
           PHASE_ENDED <= '0';
           BLINKED <= std_logic_vector( to_unsigned( MaxGreenBlinks + 1, BLINKED'length));
           STATE_NEXT <= YELLOW;
       end case;
 
-    else -- DISABLED = '1' 
+    else 
       TIMER_LIMIT <= YellowHoldTime;
       if RUN_reg = '1' then
         BLINKED <= "0000";

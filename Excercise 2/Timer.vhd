@@ -2,8 +2,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
--- https://miscircuitos.com/power-on-reset-implementation-for-fpga-in-verilog-and-vhdl/
-
 entity Timer is
   generic (
     ClockPeriod : time
@@ -43,15 +41,11 @@ begin
         CLOCK_TICKS <= CLOCK_TICKS + 1;
       end if;
       if LIMIT'event or LIMIT /= LIMIT_reg then
-        -- LIMIT_reg <= LIMIT;
         CLOCK_TICKS <= 0;
       end if;
-
     elsif RESET_reg = '1' then -- Signal also gets reset when counter changes in value
-      -- LIMIT_reg <= LIMIT;
       CLOCK_TICKS <= 0;
-  end if;
-    
+    end if;
   end process;
 
   process (CLOCK_TICKS) is 

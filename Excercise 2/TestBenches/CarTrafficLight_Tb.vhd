@@ -18,9 +18,9 @@ architecture stimuli of CarTrafficLight_Tb is
   component TrafficLight is 
     generic (
       ClockPeriod : time;
-      YellowHoldTime : time;     -- 2 Sekunden für das Halten der Grünphase
-      GreenBlinkTime : time;      -- Zeitangabe für Hell und Dunkelphase (Einzelne Phase = / 2) 
-      MaxGreenBlinks : integer  -- Maximale Anzahl die Grün Blinken soll
+      YellowHoldTime : time;  
+      GreenBlinkTime : time; 
+      MaxGreenBlinks : integer 
     );
     port (
       signal CLK, RESET, RUN, DISABLE : in std_logic;

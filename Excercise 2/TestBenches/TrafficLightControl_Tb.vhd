@@ -36,6 +36,10 @@ architecture stimuli of TrafficLightControl_Tb is
   signal NS_CAR_RED, NS_CAR_YELLOW, NS_CAR_GREEN : std_logic;
   signal OW_CAR_RED, OW_CAR_YELLOW, OW_CAR_GREEN : std_logic;
 
+  -- Signals for Traffic Light Outputs (According to Graphic)
+  signal A2, A3 : std_logic_vector(2 downto 0);
+  signal F2, F3, F4, F5 : std_logic_vector(1 downto 0);
+
   constant GreenPhaseTime : time := 10000 ms;
   constant NightModeStart : time := 22*60 min; --22:00
   constant NightModeEnd   : time := 4*60 min;  --04:00
@@ -46,6 +50,13 @@ begin
   OW_PED <= (OW_PED_RED, OW_PED_GREEN);
   NS_CAR <= (NS_CAR_RED, NS_CAR_YELLOW, NS_CAR_GREEN);
   OW_CAR <= (OW_CAR_RED, OW_CAR_YELLOW, OW_CAR_GREEN);
+
+  A2 <= NS_CAR;
+  A3 <= OW_CAR;
+  F4 <= NS_PED;
+  F5 <= NS_PED;
+  F2 <= OW_PED;
+  F3 <= OW_PED;
 
   TL_CTL : TrafficLightControl generic map (
     GreenPhaseTime, NightModeStart, NightModeEnd

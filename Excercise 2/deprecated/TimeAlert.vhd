@@ -2,8 +2,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
--- Module that takes a given time in Milliseconds and changes the output signal once the limit is reached.
-
 entity TimeAlert is
   generic (
     ClockPeriod : time
@@ -43,7 +41,6 @@ begin
       end if;
 
       if rising_edge(RESET) or falling_edge(RESET) or LIMIT'event or LIMIT /= LIMIT_reg then -- Signal also gets reset when counter changes in value
-        -- LIMIT_reg <= LIMIT;
         ResetTicks(FINISHED_reg, CLOCK_TICKS);
       end if;
     end if;
